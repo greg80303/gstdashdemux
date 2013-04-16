@@ -114,8 +114,8 @@ static gchar *gst_mpdparser_get_segmentURL_for_range (gchar * url,
     GstRange * range);
 static gchar *gst_mpdparser_get_mediaURL (GstMpdClient * client,
     GstSegmentURLNode * segmentURL);
-static gchar *gst_mpdparser_get_initializationURL (GstURLType *
-    InitializationURL);
+static gchar *gst_mpdparser_get_initializationURL (GstMpdClient * client,
+    GstURLType * InitializationURL);
 static gchar *gst_mpdparser_build_URL_from_template (const gchar * url_template,
     const gchar * id, guint number, guint bandwidth, guint time);
 static gboolean gst_mpd_client_add_media_segment (GstActiveStream * stream,
@@ -2299,10 +2299,17 @@ gst_mpdparser_get_mediaURL (GstMpdClient * client,
 }
 
 static gchar *
-gst_mpdparser_get_initializationURL (GstURLType * InitializationURL)
+gst_mpdparser_get_initializationURL (GstMpdClient * client,
+    GstURLType * InitializationURL)
 {
+  const gchar *url_prefix;
+
+  g_return_val_if_fail (client != NULL, NULL);
   g_return_val_if_fail (InitializationURL != NULL, NULL);
-  g_return_val_if_fail (InitializationURL->sourceURL != NULL, NULL);
+
+  url_prefix = InitializationURL->sourceURL ? InitializationURL->sourceURL :
+      gst_mpdparser_get_baseURL(client);
+  g_return_val_if_fail (url_prefix != NULL, NULL);
 
   return gst_mpdparser_get_segmentURL_for_range (InitializationURL->sourceURL,
       InitializationURL->range);
@@ -3155,7 +3162,7 @@ gst_mpd_client_get_next_header (GstMpdClient * client, const gchar ** uri,
   *uri = NULL;
   if (stream->cur_segment_base && stream->cur_segment_base->Initialization) {
     *uri =
-        gst_mpdparser_get_initializationURL (stream->cur_segment_base->
+        gst_mpdparser_get_initializationURL (client, stream->cur_segment_base->
         Initialization);
   } else if (stream->cur_seg_template) {
     const gchar *initialization = NULL;
