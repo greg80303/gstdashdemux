@@ -1516,6 +1516,9 @@ gst_dash_demux_get_video_input_caps (GstDashDemux * demux,
     return NULL;
 
   caps = gst_caps_new_empty_simple (mimeType);
+  if (g_strcmp0(mimeType, "video/mpegts") == 0) {
+    gst_caps_set_simple (caps, "systemstream", G_TYPE_BOOLEAN, TRUE, NULL);
+  }
   if (width > 0 && height > 0) {
     gst_caps_set_simple (caps, "width", G_TYPE_INT, width, "height",
         G_TYPE_INT, height, NULL);
