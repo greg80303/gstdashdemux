@@ -2921,6 +2921,8 @@ gst_mpd_client_setup_media_presentation (GstMpdClient * client)
       /* last Period of the Media Presentation */
       duration =
           client->mpd_node->mediaPresentationDuration * GST_MSECOND - start;
+    } else if (client->mpd_node->minimumUpdatePeriod != -1) {
+      duration = client->mpd_node->minimumUpdatePeriod * GST_MSECOND;
     } else {
       /* Invalid MPD file! */
       goto syntax_error;
