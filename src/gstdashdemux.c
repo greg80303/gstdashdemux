@@ -1280,7 +1280,7 @@ gst_dash_demux_download_loop (GstDashDemux * demux)
   GstClockTime target_buffering_time =
       demux->min_buffering_time +
       gst_mpd_client_get_next_fragment_duration (demux->client);
-  if (demux->max_buffering_time > target_buffering_time)
+  if (demux->max_buffering_time < target_buffering_time)
     target_buffering_time = demux->max_buffering_time;
   if (!demux->end_of_manifest
       && gst_dash_demux_get_buffering_time (demux) < target_buffering_time) {
