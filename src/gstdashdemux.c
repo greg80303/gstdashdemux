@@ -1219,20 +1219,19 @@ gst_dash_demux_download_loop (GstDashDemux * demux)
         if (buffer == NULL) {
           GST_WARNING_OBJECT (demux, "Error validating the manifest.");
         } else {
-          GstMemory *memory = gst_buffer_get_all_memory (buffer);
-          if (!gst_mpd_parse (demux->client, (gchar *) memory->offset,
-                  memory->size)) {
+          GstMapInfo info;
+          if (!gst_buffer_map (demux->manifest, &info, GST_MAP_READ)
+              || !gst_mpd_parse (demux->client, (gchar *) info.data, info.size)) {
             /* In most cases, this will happen if we set a wrong url in the
              * source element and we have received the 404 HTML response instead of
              * the manifest */
             GST_WARNING_OBJECT (demux, "Error parsing the manifest.");
-            gst_memory_unref (memory);
+            gst_buffer_unmap (buffer, &info);
             gst_buffer_unref (buffer);
           } else {
             GstActiveStream *stream;
             guint segment_index;
 
-            gst_memory_unref (memory);
             gst_buffer_unref (buffer);
             stream =
                 gst_mpdparser_get_active_stream_by_index (demux->client, 0);
